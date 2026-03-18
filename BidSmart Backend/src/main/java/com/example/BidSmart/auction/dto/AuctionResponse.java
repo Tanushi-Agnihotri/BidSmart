@@ -2,10 +2,12 @@ package com.example.BidSmart.auction.dto;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.example.BidSmart.auction.Auction;
 import com.example.BidSmart.auction.AuctionCondition;
+import com.example.BidSmart.auction.AuctionImage;
 import com.example.BidSmart.auction.AuctionStatus;
 
 public record AuctionResponse(
@@ -24,9 +26,18 @@ public record AuctionResponse(
     AuctionStatus status,
     UUID sellerId,
     String sellerName,
-    OffsetDateTime createdAt
+    OffsetDateTime createdAt,
+    List<String> images
 ) {
     public static AuctionResponse from(Auction auction) {
+        return from(auction, List.of());
+    }
+
+    public static AuctionResponse from(Auction auction, List<AuctionImage> auctionImages) {
+        List<String> imageUrls = auctionImages.stream()
+            .map(img -> "/api/images/" + img.getFilePath())
+            .toList();
+
         return new AuctionResponse(
             auction.getId(),
             auction.getTitle(),
@@ -43,7 +54,8 @@ public record AuctionResponse(
             auction.getStatus(),
             auction.getSeller().getId(),
             auction.getSeller().getFullName(),
-            auction.getCreatedAt()
+            auction.getCreatedAt(),
+            imageUrls
         );
     }
 }

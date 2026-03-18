@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auctions/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auctions/seller/{sellerId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/bids/auction/{auctionId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/images/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auctions/*/images").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/error").permitAll()

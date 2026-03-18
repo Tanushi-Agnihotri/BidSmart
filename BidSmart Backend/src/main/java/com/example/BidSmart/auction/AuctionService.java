@@ -19,9 +19,11 @@ import com.example.BidSmart.user.UserRole;
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
+    private final AuctionImageRepository imageRepository;
 
-    public AuctionService(AuctionRepository auctionRepository) {
+    public AuctionService(AuctionRepository auctionRepository, AuctionImageRepository imageRepository) {
         this.auctionRepository = auctionRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Transactional(readOnly = true)
@@ -40,20 +42,20 @@ public class AuctionService {
             );
         }
 
-        return auctions.stream().map(AuctionResponse::from).toList();
+        return auctions.stream().map(this::toResponseWithImages).toList();
     }
 
     @Transactional(readOnly = true)
     public AuctionResponse getAuctionById(UUID id) {
         Auction auction = findAuctionOrThrow(id);
-        return AuctionResponse.from(auction);
+        return toResponseWithImages(auction);
     }
 
     @Transactional(readOnly = true)
     public List<AuctionResponse> getAuctionsBySeller(UUID sellerId) {
         return auctionRepository.findBySellerIdOrderByCreatedAtDesc(sellerId)
             .stream()
-            .map(AuctionResponse::from)
+            .map(this::toResponseWithImages)
             .toList();
     }
 
@@ -79,7 +81,7 @@ public class AuctionService {
         auction.setSeller(seller);
 
         Auction saved = auctionRepository.save(auction);
-        return AuctionResponse.from(saved);
+        return toResponseWithImages(saved);
     }
 
     @Transactional
@@ -106,7 +108,7 @@ public class AuctionService {
         if (request.bidIncrement() != null) auction.setBidIncrement(request.bidIncrement());
 
         Auction saved = auctionRepository.save(auction);
-        return AuctionResponse.from(saved);
+        return toResponseWithImages(saved);
     }
 
     @Transactional
@@ -127,6 +129,11 @@ public class AuctionService {
     private Auction findAuctionOrThrow(UUID id) {
         return auctionRepository.findById(id)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Auction not found"));
+    }
+
+    private AuctionResponse toResponseWithImages(Auction auction) {
+        List<AuctionImage> images = imageRepository.findByAuctionIdOrderBySortOrder(auction.getId());
+        return AuctionResponse.from(auction, images);
     }
 
     private List<AuctionStatus> parseStatuses(String status) {
