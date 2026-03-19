@@ -15,15 +15,19 @@ import com.example.BidSmart.exception.ApiException;
 import com.example.BidSmart.user.User;
 import com.example.BidSmart.user.UserRole;
 
+import com.example.BidSmart.watchlist.WatchlistRepository;
+
 @Service
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final AuctionImageRepository imageRepository;
+    private final WatchlistRepository watchlistRepository;
 
-    public AuctionService(AuctionRepository auctionRepository, AuctionImageRepository imageRepository) {
+    public AuctionService(AuctionRepository auctionRepository, AuctionImageRepository imageRepository, WatchlistRepository watchlistRepository) {
         this.auctionRepository = auctionRepository;
         this.imageRepository = imageRepository;
+        this.watchlistRepository = watchlistRepository;
     }
 
     @Transactional(readOnly = true)
@@ -123,6 +127,8 @@ public class AuctionService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Cannot delete an auction that has bids");
         }
 
+        watchlistRepository.deleteByAuctionId(auctionId);
+        imageRepository.deleteByAuctionId(auctionId);
         auctionRepository.delete(auction);
     }
 
