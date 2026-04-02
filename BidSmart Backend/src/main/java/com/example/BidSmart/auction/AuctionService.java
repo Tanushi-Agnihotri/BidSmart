@@ -42,7 +42,7 @@ public class AuctionService {
             auctions = auctionRepository.findByStatusInOrderByEndTimeAsc(statuses);
         } else {
             auctions = auctionRepository.findByStatusInOrderByEndTimeAsc(
-                List.of(AuctionStatus.ACTIVE, AuctionStatus.ENDING_SOON, AuctionStatus.UPCOMING)
+                List.of(AuctionStatus.ACTIVE, AuctionStatus.ENDING_SOON, AuctionStatus.UPCOMING, AuctionStatus.CLOSED)
             );
         }
 

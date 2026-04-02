@@ -1,6 +1,7 @@
 package com.example.BidSmart.bid;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,11 @@ public class BidService {
         // Auction must be active or ending soon
         if (auction.getStatus() != AuctionStatus.ACTIVE && auction.getStatus() != AuctionStatus.ENDING_SOON) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "This auction is not accepting bids");
+        }
+
+        // Reject bids on expired auctions (scheduler may not have closed it yet)
+        if (auction.getEndTime().isBefore(OffsetDateTime.now())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "This auction has ended");
         }
 
         // Seller cannot bid on their own auction

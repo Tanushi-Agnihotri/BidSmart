@@ -51,7 +51,12 @@ public class ImageStorageService {
     }
 
     public Path load(String fileName) {
-        return uploadDir.resolve(fileName).normalize();
+        Path resolved = uploadDir.resolve(fileName).normalize();
+        // Prevent path traversal — resolved path must stay inside uploadDir
+        if (!resolved.startsWith(uploadDir)) {
+            throw new IllegalArgumentException("Invalid file path");
+        }
+        return resolved;
     }
 
     public void delete(String fileName) {
